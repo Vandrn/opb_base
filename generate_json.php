@@ -102,9 +102,10 @@ foreach ($resultGerente->rows() as $row) {
 $row_fact['STORE_EMAIL']    = $STORE_EMAIL ?: null;  // evita string vacío
 $row_fact['LIDER_ZONA']     = $LIDER_ZONA;
 $row_fact['CORREO_GERENTE'] = $CORREO_GERENTE;
-$row_fact['ZONA']           = $ZONA;     
+$row_fact['ZONA']           = $ZONA;   
 
 // === 6. Guardar el JSON localmente ===
+unset($row_fact['JSON_GENERATED'], $row_fact['JSON_GENERATED_AT']);
 $jsonContent = json_encode($row_fact, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 $jsonFilename = $ID . '.json';
 $jsonPath = __DIR__ . '/data/' . $jsonFilename;
@@ -118,7 +119,11 @@ if (!file_put_contents($jsonPath, $jsonContent)) {
     echo "🟢 Visita registrada correctamente. JSON almacenado.";
 }
 
-// === 8. Cerrar conexiones ===
-$conn->close();
-$conn2->close();
+// Cerrar conexiones SOLO si este script se ejecuta directamente,
+// no cuando es incluido desde otro (como step9.php)
+if (basename(__FILE__) === basename($_SERVER['SCRIPT_FILENAME'])) {
+    $conn->close();
+    $conn2->close();
+}
+
 ?>

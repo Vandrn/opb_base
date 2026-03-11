@@ -1,7 +1,7 @@
 <?php
 require_once 'connection.php';
 $area = 2;
-//Definición de Variable $format
+//Definici��n de Variable $format
 $format_get = $_GET['format'] ?? null;
 $format_post = $_POST['formato'] ?? null;
 if (is_null($format_get)) {
@@ -10,7 +10,7 @@ if (is_null($format_get)) {
     $format = $format_get;
 }
 
-//Definición de variable $bv_pais_tienda
+//Definici��n de variable $bv_pais_tienda
 $bv_pais_tienda_get = $_GET['bv_pais_tienda'] ?? null;
 $bv_pais_tienda_post = $_POST['bv_pais_tienda'] ?? null;
 //BV_PAIS_TIENDA
@@ -20,7 +20,7 @@ if (is_null($bv_pais_tienda_get)) {
     $bv_pais_tienda = $bv_pais_tienda_get;
 }
 
-//Definición de variable $id_registered_visit
+//Definici��n de variable $id_registered_visit
 $id_registered_visit_get = $_GET['id_registered_visit'] ?? null;
 $id_registered_visit_post = $_POST['id_registered_visit'] ?? null;
 // Get the ID of the last inserted record
@@ -46,12 +46,12 @@ if (is_null($bv_pais_tienda_get)) {
     $success = $stmt->execute();
 
     if ($success) {
-        $insertMessage = "Información de Evaluación: Código de vestimenta ADOCKER Ingresada Correctamente.";
+        $insertMessage = "Información de Evaluación Código de vestimenta ADOCKER Ingresada Correctamente.";
     } else {
         $insertMessage = "Hubo un error al ingresar la información: " . $stmt->error;
     }
 }
-// Obtener preguntas de tipo "Sí/No" que son válidas para el formato en $format
+// Obtener preguntas de tipo "S��/No" que son v��lidas para el formato en $format
 $query = "SELECT id_pregunta, pregunta
           FROM dim_preguntas
           WHERE ID_AREA = $area
@@ -62,7 +62,7 @@ $query = "SELECT id_pregunta, pregunta
 
 $result = mysqli_query($conn2, $query);
 
-// Obtener preguntas de tipo "Si/No = 0" que son válidas para el formato en $format
+// Obtener preguntas de tipo "Si/No = 0" que son v��lidas para el formato en $format
 $query2 = "SELECT id_pregunta, pregunta
            FROM dim_preguntas
            WHERE ID_AREA = $area
@@ -73,7 +73,7 @@ $query2 = "SELECT id_pregunta, pregunta
 
 $result2 = mysqli_query($conn2, $query2);
 
-// Obtener observación
+// Obtener observaci��n
 $query3 = "SELECT OBSERVACION FROM dim_observaciones WHERE ID_AREA = $area";
 $result3 = mysqli_query($conn2, $query3);
 
@@ -195,7 +195,7 @@ $conn2->close();
     </div>
 
     <script>
-        // script para mostrar un SweetAlert en lugar del elemento HTML de éxito
+        // script para mostrar un SweetAlert en lugar del elemento HTML de ��xito
         document.addEventListener("DOMContentLoaded", function() {
             var successMessage = "<?php echo isset($insertMessage) ? $insertMessage : ''; ?>";
 
@@ -205,7 +205,7 @@ $conn2->close();
                     title: 'Éxito',
                     text: successMessage,
                     showConfirmButton: false,
-                    timer: 2000 // Oculta automáticamente después de 2 segundos
+                    timer: 2000 // Oculta autom��ticamente despu��s de 2 segundos
                 });
             }
         });

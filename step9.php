@@ -38,10 +38,105 @@ $insertMessage = $success
 // =========================
 // 3️⃣ Ejecutar generate_json.php internamente (sin salir de la vista)
 // =========================
-ob_start();
-$_GET['ID'] = $id_registered_visit;
-include 'generate_json.php'; // lo ejecuta internamente
-$generateOutput = ob_get_clean(); // captura lo que imprime
+if (!$success) {
+    $generateOutput = "❌ No se generó JSON porque falló el guardado: " . $stmt->error;
+} else {
+
+    $conn2->begin_transaction();
+
+    try {
+        // Bloquea la fila
+        $check = $conn2->prepare("
+            SELECT JSON_GENERATED
+            FROM fact_visitas
+            WHERE ID_VISITA = ?
+            FOR UPDATE
+        ");
+        $check->bind_param("i", $id_registered_visit);
+        $check->execute();
+        $res = $check->get_result();
+
+        if ($res->num_rows === 0) {
+            throw new Exception("No existe la visita con ID $id_registered_visit.");
+        }
+
+        $row = $res->fetch_assoc();
+        $status = (int)($row['JSON_GENERATED'] ?? 0);
+
+        if ($status === 1) {
+            $generateOutput = "⚠️ Ya se había generado el JSON para esta visita. No se generó nuevamente.";
+            $conn2->commit();
+
+        } elseif ($status === 2) {
+            $generateOutput = "⏳ Esta visita ya está en proceso de generación de JSON. Intentá de nuevo en unos segundos.";
+            $conn2->commit();
+
+        } else {
+            // 0 => lo marcamos como "generando" (2) para bloquear doble click
+            $lock = $conn2->prepare("
+                UPDATE fact_visitas
+                SET JSON_GENERATED = 2,
+                    JSON_GENERATED_AT = NOW()
+                WHERE ID_VISITA = ?
+            ");
+            $lock->bind_param("i", $id_registered_visit);
+            if (!$lock->execute()) {
+                throw new Exception("No se pudo bloquear generación: " . $lock->error);
+            }
+
+            $conn2->commit();
+
+            // Generar JSON
+            ob_start();
+            $_GET['ID'] = $id_registered_visit;
+            include 'generate_json.php';
+            $generateOutput = ob_get_clean();
+
+            // Si llegó aquí, marcamos como generado (1)
+            $done = $conn2->prepare("
+                UPDATE fact_visitas
+                SET JSON_GENERATED = 1,
+                    JSON_GENERATED_AT = NOW()
+                WHERE ID_VISITA = ?
+            ");
+            $done->bind_param("i", $id_registered_visit);
+            $done->execute();
+        }
+
+    } catch (Throwable $e) {
+        // 1) Intentar rollback SOLO si la conexión sigue viva
+        try {
+            if (isset($conn2) && $conn2 instanceof mysqli) {
+                // ping() devuelve false si está cerrada/caída
+                if (@$conn2->ping()) {
+                    @$conn2->rollback();
+                }
+            }
+        } catch (Throwable $ignored) {
+            // no hacemos nada, solo evitamos fatal error
+        }
+    
+        // 2) Intentar "desbloquear" SOLO si la conexión sigue viva
+        try {
+            if (isset($conn2) && $conn2 instanceof mysqli && @$conn2->ping()) {
+                $unlock = $conn2->prepare("
+                    UPDATE fact_visitas
+                    SET JSON_GENERATED = 0
+                    WHERE ID_VISITA = ?
+                ");
+                if ($unlock) {
+                    $unlock->bind_param("i", $id_registered_visit);
+                    $unlock->execute();
+                }
+            }
+        } catch (Throwable $ignored) {
+            // igual, evitamos fatal
+        }
+    
+        $generateOutput = "❌ Error en control anti-duplicado: " . $e->getMessage();
+    }
+
+}
 
 
 //cerrar conexiones
