@@ -1,15 +1,22 @@
 <?php
 
 return [
-    'default' => env('CACHE_DRIVER', 'file'),
+    'default' => env('CACHE_DRIVER', 'array'),
 
     'stores' => [
+        'array' => [
+            'driver' => 'array',
+        ],
+
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
         ],
-        'array' => [
-            'driver' => 'array',
+
+        'null' => [
+            'driver' => 'null',
         ],
     ],
+
+    'prefix' => env('CACHE_PREFIX', 'opb_cache'),
 ];

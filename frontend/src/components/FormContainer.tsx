@@ -9,16 +9,7 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 const TOTAL_STEPS = 9
 
-// Mapping de steps a areas
-const STEP_AREA_MAP: Record<number, string> = {
-  2: '1', // Personal/Uniforme
-  3: '2', // Servicio al Cliente
-  4: '3', // Exhibición
-  5: '4', // Infraestructura
-  6: '5', // Bodega
-  7: '6', // Conocimiento
-  8: '7', // Tecnología
-}
+// Mapeo: currentStep 2-8 corresponde a secciones 1-7, currentStep 9 es resumen/envío
 
 export function FormContainer() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -221,9 +212,7 @@ export function FormContainer() {
 
         {currentStep > 1 && currentStep < 9 && (
           <StepForm
-            stepNumber={currentStep}
-            areaId={STEP_AREA_MAP[currentStep]}
-            format={visit.format || ''}
+            stepNumber={currentStep - 1}
             data={stepData[currentStep] || {}}
             onUpdate={(data) => {
               setStepData({ ...stepData, [currentStep]: data })
@@ -236,6 +225,7 @@ export function FormContainer() {
         {currentStep === 9 && (
           <Step9
             data={stepData[9] || {}}
+            allStepData={stepData}
             onUpdate={(data) => {
               setStepData({ ...stepData, 9: data })
             }}

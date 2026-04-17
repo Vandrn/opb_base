@@ -12,7 +12,7 @@ class BigQueryService
     protected $table = 'adoc-bi-prd.OPB.gerente_pais';
     protected $masterStore = 'adoc-bi-prd.BI_Repo_Qlik.New_Store_Master';
     protected $masterLideres = 'adoc-bi-prd.OPB.dim_lideres_correo';
-    protected $masterGerentes = 'adoc-bi-dev.DEV_OPB.dim_gerentes';
+    protected $masterGerentes = 'adoc-bi-dev.OPB.Dim_gerentes';
 
     public function __construct()
     {
@@ -38,8 +38,8 @@ class BigQueryService
                 country,
                 country_code,
                 code
-            FROM `adoc-bi-prd.OPB.dim_country_code`
-            WHERE country IN ('El Salvador', 'Guatemala', 'Costa Rica', 'Honduras', 'Nicaragua', 'Panama')
+            FROM `adoc-bi-dev.OPB.DIM_PAIS`
+            WHERE PAIS IN ('El Salvador', 'Guatemala', 'Costa Rica', 'Honduras', 'Nicaragua', 'Panama')
             ORDER BY country ASC
         ";
 
