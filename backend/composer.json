@@ -1,0 +1,8 @@
+{
+    "require": {
+        "google/cloud-bigquery": "^1.34",
+        "laravel/framework": "^12.56",
+        "laravel/sanctum": "^4.3",
+        "google/cloud-storage": "^1.50"
+    }
+}
